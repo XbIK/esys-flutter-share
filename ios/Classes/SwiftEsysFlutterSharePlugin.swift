@@ -30,14 +30,22 @@ public class SwiftEsysFlutterSharePlugin: NSObject, FlutterPlugin {
         
         // set up activity view controller
         let activityViewController:UIActivityViewController = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-        
+
         // present the view controller
         let controller = UIApplication.shared.keyWindow!.rootViewController as! FlutterViewController
-        activityViewController.popoverPresentationController?.sourceView = controller.view
-        
+           if let popover = activityViewController.popoverPresentationController {
+                            popover.sourceView = controller.view
+                            let bounds = controller.view.bounds
+                            popover.sourceRect = CGRect(x: bounds.width - 96, y: 20, width: 48, height: 48)
+                        }
+
         controller.show(activityViewController, sender: self)
+
+
+
+
     }
-    
+
     func file(arguments:Any?) -> Void {
         // prepare method channel args
         // no use in ios
@@ -45,28 +53,22 @@ public class SwiftEsysFlutterSharePlugin: NSObject, FlutterPlugin {
         let argsMap = arguments as! NSDictionary
         let name:String = argsMap.value(forKey: "name") as! String
         let text:String = argsMap.value(forKey: "text") as! String
-        
+
         // load the file
         let docsPath:String = NSSearchPathForDirectoriesInDomains(.cachesDirectory,.userDomainMask , true).first!;
         let contentUri = NSURL(fileURLWithPath: docsPath).appendingPathComponent(name)
-        
+
         // prepare sctivity items
         var activityItems:[Any] = [contentUri!];
         if(!text.isEmpty){
             // add optional text
             activityItems.append(text);
         }
-        
+
         // set up activity view controller
-        let activityViewController:UIActivityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-        
-        // present the view controller
-        let controller = UIApplication.shared.keyWindow!.rootViewController as! FlutterViewController
-        activityViewController.popoverPresentationController?.sourceView = controller.view
-        
-        controller.show(activityViewController, sender: self)
+        setupAndShow(activityItems)
     }
-    
+
     func files(arguments:Any?) -> Void {
         // prepare method channel args
         // no use in ios
@@ -74,28 +76,33 @@ public class SwiftEsysFlutterSharePlugin: NSObject, FlutterPlugin {
         let argsMap = arguments as! NSDictionary
         let names:[String] = argsMap.value(forKey: "names") as! [String]
         let text:String = argsMap.value(forKey: "text") as! String
-        
+
         // prepare sctivity items
         var activityItems:[Any] = [];
-        
+
         // load the files
         for name in names {
             let docsPath:String = NSSearchPathForDirectoriesInDomains(.cachesDirectory,.userDomainMask , true).first!;
             activityItems.append(NSURL(fileURLWithPath: docsPath).appendingPathComponent(name)!);
         }
-        
+
         if(!text.isEmpty){
             // add optional text
             activityItems.append(text);
         }
-        
+
         // set up activity view controller
-        let activityViewController:UIActivityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-        
-        // present the view controller
+        setupAndShow(activityItems)
+    }
+
+    private func setupAndShow(_ activityItems: [Any]) {
+        let activityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
         let controller = UIApplication.shared.keyWindow!.rootViewController as! FlutterViewController
-        activityViewController.popoverPresentationController?.sourceView = controller.view
-        
+        if let popover = activityViewController.popoverPresentationController {
+            popover.sourceView = controller.view
+            let bounds = controller.view.bounds
+            popover.sourceRect = CGRect(x: bounds.width - 96, y: 20, width: 48, height: 48)
+        }
         controller.show(activityViewController, sender: self)
     }
 }
